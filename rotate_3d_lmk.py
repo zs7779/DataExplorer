@@ -1,7 +1,7 @@
 import cv2
 import h5py
 import numpy as np
-
+import math
 
 def draw_landmark(canvas, landmark, color=(0, 0, 255)):
     for i, l in enumerate(landmark):
@@ -71,29 +71,46 @@ with h5py.File(lmk_file, 'r') as lmk_h5:
 
     for grp in lmk_h5:
         if '76' in grp:
-            for fi, lmk in zip(lmk_h5[grp]['frame_num'], lmk_h5[grp]['landmarks']):
+            while 1:
+                lmk = lmk_h5[grp]['landmarks'][220]
+                rx, ry, rz = [np.random.normal(), np.random.normal(), np.random.normal()]
+                cosx = math.cos(rx)
+                sinx = math.sin(rx)
+                cosy = math.cos(ry)
+                siny = math.sin(ry)
+                cosz = math.cos(rz)
+                sinz = math.sin(rz)
+                rot_matrix_x = np.array([[1, 0, 0], [0, cosx, sinx], [0, -sinx, cosx]])
+                rot_matrix_y = np.array([[cosy, 0, siny], [0, 1, 0], [-siny, 0, cosy]])
+                rot_matrix_z = np.array([[cosz, sinz, 0], [-sinz, cosz, 0], [0, 0, 1]])
+                mat = np.matmul(np.matmul(rot_matrix_x, rot_matrix_y), rot_matrix_z)
+                # lmk = np.matmul(lmk, rot_matrix_x)
+                # lmk = np.matmul(lmk, rot_matrix_y)
+                lmk = np.matmul(lmk, mat)
+
                 translation = np.array([320, 140, 0]) - lmk[30]
                 lmk += translation
-
                 canvas = np.zeros((480, 640, 3), dtype=np.float32)
-                draw_landmark(canvas, lmk, (0, 0, 255))
+                draw_landmark(canvas, lmk, (255, 255, 255))
 
                 anchor_points = lmk[anchors].astype(int)
                 normal = find_normal_vector(lmk)*100
-                cv2.arrowedLine(canvas, tuple(anchor_points[0][:2]), tuple(anchor_points[0][:2] + normal[:2].astype(int)),
+                cv2.arrowedLine(canvas, tuple(anchor_points[0][:2]),
+                                tuple(anchor_points[1][:2]),
                                 color=(0, 0, 255))
+                cv2.arrowedLine(canvas, tuple(anchor_points[0][:2]),
+                                tuple(anchor_points[2][:2]),
+                                color=(0, 255, 0))
+                cv2.arrowedLine(canvas, tuple(anchor_points[0][:2]), tuple(anchor_points[0][:2] + normal[:2].astype(int)),
+                                color=(255, 0, 0))
 
                 lmk, lmkx, lmky, lmkz = transform_lmk(lmk, normal)
 
                 draw_landmark(canvas, lmkx, (0, 0, 255))
                 draw_landmark(canvas, lmky, (0, 255, 0))
                 draw_landmark(canvas, lmkz, (255, 0, 0))
-                # anchor_points = lmk[anchors].astype(int)
-                # normal = find_normal_vector(lmk)*100
-                # cv2.arrowedLine(canvas, tuple(anchor_points[0][:2]), tuple(anchor_points[0][:2] + normal[:2].astype(int)),
-                #                 color=(0, 255, 0))
 
                 cv2.imshow(win_name, canvas)
-                cv2.waitKey(30)
+                cv2.waitKey()
 
 
