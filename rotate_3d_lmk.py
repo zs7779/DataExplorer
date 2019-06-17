@@ -111,8 +111,8 @@ def project_lmk(landmarks):
     y_axis = find_up_vector(landmarks)
 
     r0 = origin + z_axis
-    px = np.matmul((lmk - r0), x_axis)
-    py = np.matmul((lmk - r0), y_axis)
+    px = np.matmul((landmarks - r0), x_axis)
+    py = np.matmul((landmarks - r0), y_axis)
     landmarks = np.stack([px, py]).T
 
     translation = canvas_centre[:2] - landmarks[nose]
@@ -131,9 +131,9 @@ with h5py.File(lmk_file, 'r') as lmk_h5:
         if '76' in grp:
             for lmk in lmk_h5[grp]['landmarks']:
                 canvas = np.zeros((480, 640, 3), dtype=np.float32)
-                trans = np.array([320, 140, 0]) - lmk[30]
-                lmk += trans
-                draw_landmark(canvas, lmk, (255, 255, 255))
+                # trans = np.array([320, 140, 0]) - lmk[30]
+                # lmk += trans
+                # draw_landmark(canvas, lmk, (255, 255, 255))
 
                 lmk = project_lmk(lmk)
                 draw_landmark(canvas, lmk, (255, 255, 255))
