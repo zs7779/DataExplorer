@@ -70,7 +70,7 @@ def transform_lmk(landmarks):
     ux, uy, uz = plane_rotation_vector.tolist()
     x, y, z = plane_normal.tolist()
     cosx = np.linalg.norm([y, z]) / np.linalg.norm([x, y, z])
-    sinx = y / np.linalg.norm([x, y, z])
+    sinx = -y / np.linalg.norm([x, y, z])
     rot_matrix_x = np.array([[cosx + ux**2 * (1 - cosx), ux * uy * (1 - cosx) - uz * sinx, ux * uz * (1 - cosx) + uy * sinx],
                              [uy * ux * (1 - cosx) + uz * sinx, cosx + uy**2 * (1 - cosx), uy * uz * (1 - cosx) - ux * sinx],
                              [uz * ux * (1 - cosx) - uy * sinx, uz * uy * (1 - cosx) + ux * sinx, cosx + uz**2 * (1 - cosx)]])
@@ -88,7 +88,7 @@ def transform_lmk(landmarks):
     sinz = x / np.linalg.norm([x, y])
     rot_matrix_z = np.array([[cosz, -sinz, 0], [sinz, cosz, 0], [0, 0, 1]])
 
-    landmarkx = np.matmul(landmarks, rot_matrix_x.T)
+    landmarkx = np.matmul(landmarks, rot_matrix_x)
     landmarky = np.matmul(landmarkx, rot_matrix_y)
     landmarkz = np.matmul(landmarky, rot_matrix_z)
 
